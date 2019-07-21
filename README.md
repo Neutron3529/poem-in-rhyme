@@ -8,6 +8,16 @@
 
 Since most of the potential users are Chinese, Here I will mainly provide Chinese rather than English to explain what I have done.
 
+## Requirements
+
+Python 3.6
+
+```
+python -m pip install numpy
+python -m pip install tf-nightly-gpu-2.0-preview
+python -m pip install pypinyin
+```
+
 ## 原理
 
 在最开始，用pyPinYin获取汉字的声母、韵母跟音调，获取不到的留空。
