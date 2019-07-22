@@ -1,24 +1,21 @@
 import tensorflow as tf
 tf.config.optimizer.set_jit(True)
-#physical_devices = tf.config.experimental.list_physical_devices('GPU')
-#assert len(physical_devices) > 0, "Not enough GPU hardware devices available"
-#tf.config.experimental.set_memory_growth(physical_devices[0], True)
 import numpy as np
 import os
 import time
 
-path_to_file="D:\\pen\\(torch)\\char-rnn-master\\chinese\\È«ÌÆÊ«-utf8-wash.txt"
+path_to_file="D:\\pen\\(torch)\\char-rnn-master\\chinese\\å…¨å”è¯—-utf8-wash.txt"
 text = open(path_to_file, 'rb').read().decode(encoding='utf8')
 print ('Length of text: {} characters'.format(len(text)))
 
 vocab = sorted(set(text))
 print ('{} unique characters'.format(len(vocab)))
 
-#ÖÆ×÷char<->idxµÄÓ³Éä
+#åˆ¶ä½œchar<->idxçš„æ˜ å°„
 char2idx = {u:i for i, u in enumerate(vocab)}
 idx2char = np.array(vocab)
 
-#ÆôÓÃÆ´Òô£¨ÕâÀïÊ¹ÓÃpypinyin£¬Ä¿µÄÊÇ½«Æ´Òô·Ö³ÉÈı²¿·Ö£¬1ÎªÉùÄ¸£¨¿ÉÒÔÎª¿Õ£©£¬2ÎªÔÏÄ¸£¬3ÎªÉùµ÷£©
+#å¯ç”¨æ‹¼éŸ³ï¼ˆè¿™é‡Œä½¿ç”¨pypinyinï¼Œç›®çš„æ˜¯å°†æ‹¼éŸ³åˆ†æˆä¸‰éƒ¨åˆ†ï¼Œ1ä¸ºå£°æ¯ï¼ˆå¯ä»¥ä¸ºç©ºï¼‰ï¼Œ2ä¸ºéŸµæ¯ï¼Œ3ä¸ºå£°è°ƒï¼‰
 from pypinyin import pinyin
 def myPinYin(char,style):
   try: 
@@ -36,12 +33,12 @@ s2idx={s:i for i,s in enumerate(uniqS)}
 y2idx={y:i for i,y in enumerate(uniqY)}
 
 def processPinYin(char):
-  #¼òµ¥Çø·ÖÉùÄ¸ÓëÔÏÄ¸
+  #ç®€å•åŒºåˆ†å£°æ¯ä¸éŸµæ¯
   py=myPinYin(char,8)
   shengMu=s2idx[myPinYin(char,3)]
   tone=int('0'+''.join(i for i in filter(str.isdigit, myPinYin(char,9))))
   yunMu=y2idx[myPinYin(char,5)]
-  #¶Ôzhi chi shi zi ci siÒÔ¼°ri½øĞĞ´¦Àí£¬Õâ¼¸¸öÓëÆäËûµÄiÏà±È²¢²»ÑºÔÏ
+  #å¯¹zhi chi shi zi ci siä»¥åŠriè¿›è¡Œå¤„ç†ï¼Œè¿™å‡ ä¸ªä¸å…¶ä»–çš„iç›¸æ¯”å¹¶ä¸æŠ¼éŸµ
   try:
     if py[0] in set(('z','x','c')) and 'i' in py[1:3]:
       if py[1]=='i': yunMu=y2idx['?i']
@@ -96,13 +93,29 @@ pyembedding_dim = 16
 rnn_units = 1024
 
 
-#SMOH=tf.expand_dims(tf.keras.backend.one_hot(vocab_as_pyint[:,0],shengMu_size),2)
-#YMOH=tf.expand_dims(tf.keras.backend.one_hot(vocab_as_pyint[:,1],yunMu_size),2)
-#TOH=tf.expand_dims(tf.keras.backend.one_hot(vocab_as_pyint[:,2],tone_size),2)
+SGroup=(('b','p','m','f'),('d','t','n','l'),('zh','ch','sh','r'),('g','k','h'),('j','q','x'),('z','c','s'))#https://baike.baidu.com/item/å£°æ¯
+YGroup=(('a','ua','ia'),('o','uo'),('e',),('ie','ve'),('?hi','?i'),('er',),('i',),('ei','uei'),('ai','uai'),('u',),('v',),('ou','iou'),('ao','iao'),('an','ian','uan','van'),('en','in','uen','vn'),('ang','uang','iang'),('eng','ing','ueng'),('ong','iong'))#https://baike.baidu.com/item/æŠ¼éŸµ
+TGroup=((1,2),(3,4))#é˜´å¹³é˜³å¹³ï¼Œä¸Šå£°å»å£°
+t2idx=[i for i in range(5)]
 SMOH=tf.keras.backend.one_hot(vocab_as_pyint[:,0],shengMu_size)
 YMOH=tf.keras.backend.one_hot(vocab_as_pyint[:,1],yunMu_size)
 TOH=tf.keras.backend.one_hot(vocab_as_pyint[:,2],tone_size)
-def build_model(vocab_size, embedding_dim, rnn_units, batch_size):
+SE=np.eye(shengMu_size,shengMu_size)
+YE=np.eye(yunMu_size,yunMu_size)
+TE=np.eye(tone_size,tone_size)
+if True:#å¤„ç†æŠ¼éŸµï¼Œå°†åŒç±»å£°æ¯/éŸµæ¯/å£°è°ƒç®—æˆä¸€ç±»ï¼Œä»¥å‡å°‘ç±»ä¼¼XXXXXXå¤©ï¼ŒXXXXXXå¤©è¿™æ ·çš„é‡å¤éŸµå­—å‡ºç°çš„æ¦‚ç‡ã€‚
+ for x in SGroup:
+  SE[(np.array([s2idx[x] for x in x]).reshape(-1,1),np.array([s2idx[x] for x in x]))]=1./len(x)
+ for x in YGroup:
+  YE[(np.array([y2idx[x] for x in x]).reshape(-1,1),np.array([y2idx[x] for x in x]))]=1./len(x)
+ for x in TGroup:
+  TE[(np.array([t2idx[x] for x in x]).reshape(-1,1),np.array([t2idx[x] for x in x]))]=1./len(x)
+ ST=tf.einsum('bc,cd->bd',SMOH,tf.cast(SE,tf.float32))
+ YT=tf.einsum('bc,cd->bd',YMOH,tf.cast(YE,tf.float32))
+ TT=tf.einsum('bc,cd->bd',TOH,tf.cast(TE,tf.float32))
+
+del SMOH,YMOH,TOH,SE,YE,TE,SGroup,YGroup,TGroup,char2idx,s2idx,y2idx,t2idx,uniqS,uniqY
+def build_model(vocab_size, embedding_dim, rnn_units, batch_size,drop=True):
 #  def spilt(x):
 #    return x[:,:,0],x[:,:,1],x[:,:,2],x[:,:,3]
   inputs  = tf.keras.layers.Input(batch_shape=(batch_size,None,4),dtype='int32')
@@ -112,7 +125,10 @@ def build_model(vocab_size, embedding_dim, rnn_units, batch_size):
   se1     = tf.keras.layers.Embedding(vocab_size, pyembedding_dim,batch_input_shape=[batch_size, None])(slice_1)
   se2     = tf.keras.layers.Embedding(vocab_size, pyembedding_dim,batch_input_shape=[batch_size, None])(slice_2)
   se3     = tf.keras.layers.Embedding(vocab_size, pyembedding_dim,batch_input_shape=[batch_size, None])(slice_3)
-  combined= tf.keras.layers.concatenate([se0,se1,se2,se3], axis=-1)
+  if drop:
+    combined= tf.keras.layers.Dropout(.5)(tf.keras.layers.concatenate([se0,se1,se2,se3], axis=-1))
+  else:
+    combined= tf.keras.layers.concatenate([se0,se1,se2,se3], axis=-1)
   lstm    = tf.keras.layers.LSTM(rnn_units,return_sequences=True,stateful=True,recurrent_initializer='glorot_uniform')(combined)
   lstm2   = tf.keras.layers.LSTM(rnn_units,return_sequences=True,stateful=True,recurrent_initializer='glorot_uniform')(lstm)
   out0    = tf.keras.layers.Dense(vocab_size,activation='softmax')(lstm2)
@@ -122,9 +138,9 @@ def build_model(vocab_size, embedding_dim, rnn_units, batch_size):
 #  loss0=tf.expand_dims(tf.nn.softmax_cross_entropy_with_logits(slice_1,out01)+tf.nn.softmax_cross_entropy_with_logits(slice_2,out02)+tf.nn.softmax_cross_entropy_with_logits(slice_3,out03),-1)
   cce=tf.keras.losses.CategoricalCrossentropy(reduction='none',from_logits=True)
   aux     = tf.keras.backend.expand_dims(tf.keras.layers.add([
-  cce(tf.einsum('abc,cd->abd',out0,SMOH),out1),
-  cce(tf.einsum('abc,cd->abd',out0,YMOH),out2),
-  cce(tf.einsum('abc,cd->abd',out0,TOH),out3)
+  cce(tf.einsum('abc,cd->abd',out0,ST),out1),
+  cce(tf.einsum('abc,cd->abd',out0,YT),out2),
+  cce(tf.einsum('abc,cd->abd',out0,TT),out3)
 			]),axis=-1)
   o= tf.keras.layers.concatenate([out0,out1,out2,out3,aux], axis=-1)
   return tf.keras.models.Model(inputs=inputs, outputs=o)
@@ -186,7 +202,6 @@ print("scalar_loss:      ", example_batch_loss[3].numpy().mean())
 
 ''';del _
 
-model.compile(optimizer='adam', loss=loss)
 
 
 # Directory where the checkpoints will be saved
@@ -194,6 +209,7 @@ checkpoint_dir = '.\\training_checkpoints'
 # Name of the checkpoint files
 checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt_{epoch}")
 
+model.compile(optimizer='nadam', loss=loss)
 
 EPOCHS=10
 checkpoint_callback=tf.keras.callbacks.ModelCheckpoint(
@@ -201,12 +217,33 @@ checkpoint_callback=tf.keras.callbacks.ModelCheckpoint(
     save_weights_only=True,
     period=EPOCHS)
 
-
-
-
+_='''
+try:#try to restore a previous result if available
+  model.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
+except:
+  pass
+''';del _
 #history = model.fit(dataset, epochs=EPOCHS)
 
 history = model.fit(dataset, epochs=EPOCHS, callbacks=[checkpoint_callback])
+
+
+model = build_model(
+  vocab_size = len(vocab),
+  embedding_dim=embedding_dim,
+  rnn_units=rnn_units,
+  batch_size=BATCH_SIZE,
+  drop=False)
+model.compile(optimizer='nadam', loss=loss)
+model.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
+EPOCHS=11
+checkpoint_callback=tf.keras.callbacks.ModelCheckpoint(
+    filepath=checkpoint_prefix,
+    save_weights_only=True,
+    period=EPOCHS)
+
+history = model.fit(dataset, epochs=EPOCHS, callbacks=[checkpoint_callback])
+
 
 
 tf.train.latest_checkpoint(checkpoint_dir)
@@ -216,7 +253,7 @@ model.build(tf.TensorShape([1, None]))
 
 
 
-def generate_text(model, start_string):
+def generate_text(model, start_string,temperature = 1.0):
   # Evaluation step (generating text using the learned model)
   # Number of characters to generate
   num_generate = 1000
@@ -228,7 +265,7 @@ def generate_text(model, start_string):
   # Low temperatures results in more predictable text.
   # Higher temperatures results in more surprising text.
   # Experiment to find the best setting.
-  temperature = 1.0
+  
   print(start_string,end='')
   # Here batch size == 1
   model.reset_states()
@@ -247,4 +284,4 @@ def generate_text(model, start_string):
   print()
   return (start_string + ''.join(text_generated))
 
-print(generate_text(model, start_string=u"ÉúÃüµÄÒâÒå"))
+print(generate_text(model, start_string=u"ç”Ÿå‘½çš„æ„ä¹‰ ",temperature =.5))
