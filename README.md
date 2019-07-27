@@ -106,5 +106,6 @@ delim3=delim2+tone_size    #[:,:,delim3]是损失函数
 
 # Notice
 
-本文的代码有一半以上都是从 https://tensorflow.google.cn/beta/tutorials/text/text_generation 获取的
+Tensorflow的代码有一半以上都是从 https://tensorflow.google.cn/beta/tutorials/text/text_generation 获取的
+MXNet的代码是用Tensorflow代码改的
 
