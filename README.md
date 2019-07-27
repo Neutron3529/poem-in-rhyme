@@ -5,7 +5,9 @@
 用tf的原因很简单，因为不明原因我的pyTorch跟MXNet都炸掉了
 
 V0.3，终于找到MXNet炸掉的原因，用N天修好&&熟悉了MXNet的用法，之后把这个炼丹demo迁移到了MXNet
+
 新模型在训练时候做到了1.25X faster
+
 至于预测？？tensorflow的预测速度就是个渣渣
 
 ## Apologize
@@ -72,13 +74,17 @@ python -m pip install pypinyin
 ## 说明
 
 使用了mxboard, tqdm进行记录，如果不想加入相应的import语句，请自行删除……
+
 使用pickle保存了预处理的数据，若觉得pickle保存的数据有问题……可以选择从完整脚本自行生成
 
 ## 使用方法
 
 解压[poem-in-rhyme-MXNet-minimal.7z](https://github.com/Neutron3529/poem-in-rhyme/releases/download/0/poem-in-rhyme-MXNet-minimal.7z)
+
 在解压目录下运行`python poem-in-rhyme-MXNet-minimal.py`
+
 如果希望生成其他古诗（比如续写《静夜思》），可以改最后一句generate_text函数里面的参数
+
 有时候运行结果并不能令人满意……如果你觉得古诗不通顺，可以多执行几次generate_text函数，总有一首诗是你想要的……
 
 # Tensorflow版
