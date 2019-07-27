@@ -1,19 +1,19 @@
 import numpy as np
 import mxnet as mx
 import pickle
-try:#Ô¤´¦Àí&&ÎÄ¼ş±£´æ
+try:#é¢„å¤„ç†&&æ–‡ä»¶ä¿å­˜
   text_as_int,vocab_as_pyint,idx2char=np.load('t2i.npy',allow_pickle=True)
   with open('c2f.pic','rb') as f: char2f=pickle.load(f)
 except:
-  path_to_file="D:\\pen\\(torch)\\char-rnn-master\\chinese\\È«ÌÆÊ«-utf8-wash.txt"
+  path_to_file="D:\\pen\\(torch)\\char-rnn-master\\chinese\\å…¨å”è¯—-utf8-wash.txt"
   text = open(path_to_file, 'rb').read().decode(encoding='utf8')
   print ('Length of text: {} characters'.format(len(text)))
   vocab = sorted(set(text))
   print ('{} unique characters'.format(len(vocab)))
-  #ÖÆ×÷char<->idxµÄÓ³Éä
+  #åˆ¶ä½œchar<->idxçš„æ˜ å°„
   char2idx = {u:i for i, u in enumerate(vocab)}
   idx2char = np.array(vocab)
-  #ÆôÓÃÆ´Òô£¨ÕâÀïÊ¹ÓÃpypinyin£¬Ä¿µÄÊÇ½«Æ´Òô·Ö³ÉÈı²¿·Ö£¬1ÎªÉùÄ¸£¨¿ÉÒÔÎª¿Õ£©£¬2ÎªÔÏÄ¸£¬3ÎªÉùµ÷£©
+  #å¯ç”¨æ‹¼éŸ³ï¼ˆè¿™é‡Œä½¿ç”¨pypinyinï¼Œç›®çš„æ˜¯å°†æ‹¼éŸ³åˆ†æˆä¸‰éƒ¨åˆ†ï¼Œ1ä¸ºå£°æ¯ï¼ˆå¯ä»¥ä¸ºç©ºï¼‰ï¼Œ2ä¸ºéŸµæ¯ï¼Œ3ä¸ºå£°è°ƒï¼‰
   from pypinyin import pinyin
   def myPinYin(char,style):
     try: 
@@ -30,12 +30,12 @@ except:
   yunMu_size   = len(uniqY)
   tone_size    = 5
   def processPinYin(char):
-    #¼òµ¥Çø·ÖÉùÄ¸ÓëÔÏÄ¸
+    #ç®€å•åŒºåˆ†å£°æ¯ä¸éŸµæ¯
     py=myPinYin(char,8)
     shengMu=s2idx[myPinYin(char,3)]
     tone=int('0'+''.join(i for i in filter(str.isdigit, myPinYin(char,9))))
     yunMu=y2idx[myPinYin(char,5)]
-    #¶Ôzhi chi shi zi ci siÒÔ¼°ri½øĞĞ´¦Àí£¬Õâ¼¸¸öÓëÆäËûµÄiÏà±È²¢²»ÑºÔÏ
+    #å¯¹zhi chi shi zi ci siä»¥åŠriè¿›è¡Œå¤„ç†ï¼Œè¿™å‡ ä¸ªä¸å…¶ä»–çš„iç›¸æ¯”å¹¶ä¸æŠ¼éŸµ
     try:
       if py[0] in set(('z','x','c')) and 'i' in py[1:3]:
         if py[1]=='i': yunMu=y2idx['?i']
@@ -84,13 +84,13 @@ class g:
 [3, 4]
 >>> [i for i in a]
 [5, 6]
-class myIter:#(»áÈÓµô×îºóÒ»¸öbatchµÄÄÚÈİ£¨Ëæ»ú·Ö²¼ÔÚÄ£ĞÍÖĞ£©£¬Í¬Ê±£¬seqµÄ¿ªÊ¼Óë½áÊø²¿·Ö¿ÉÄÜ²»ÍêÕû)
+class myIter:#(ä¼šæ‰”æ‰æœ€åä¸€ä¸ªbatchçš„å†…å®¹ï¼ˆéšæœºåˆ†å¸ƒåœ¨æ¨¡å‹ä¸­ï¼‰ï¼ŒåŒæ—¶ï¼Œseqçš„å¼€å§‹ä¸ç»“æŸéƒ¨åˆ†å¯èƒ½ä¸å®Œæ•´)
   def __init__(self,seq_len,data,discard_len,batch_size=BATCH_SIZE):
     self.seq_len=seq_len+1#will 'eat' 1 extra data.
     self.data=data
     self.data_len=data.shape[0]
-    self.take=mx.nd.arange(self.seq_len-1,dtype='int32').reshape((1,-1))#-1ÒòÎª²»ÄÜ¶Á´ğ°¸¡­¡­
-    self.discard=mx.nd.arange(discard_len+1,self.seq_len,dtype='int32').reshape((1,-1))#»á¶îÍâ¶ªÆúÈô¸É³õÊ¼labelÒÔ·ÀÖ¹nnÄâºÏ²»Í¬BatchµÄÏÎ½Ó´¦µ¼ÖÂÎåÑÔÊ«±ãÈıÑÔÊ«¡­¡­
+    self.take=mx.nd.arange(self.seq_len-1,dtype='int32').reshape((1,-1))#-1å› ä¸ºä¸èƒ½è¯»ç­”æ¡ˆâ€¦â€¦
+    self.discard=mx.nd.arange(discard_len+1,self.seq_len,dtype='int32').reshape((1,-1))#ä¼šé¢å¤–ä¸¢å¼ƒè‹¥å¹²åˆå§‹labelä»¥é˜²æ­¢nnæ‹Ÿåˆä¸åŒBatchçš„è¡”æ¥å¤„å¯¼è‡´äº”è¨€è¯—ä¾¿ä¸‰è¨€è¯—â€¦â€¦
     self.maxstep=(self.data_len//self.seq_len)//batch_size
     self.maxstart=self.data_len-self.maxstep
     self.batch_size=batch_size
@@ -102,13 +102,13 @@ class myIter:#(»áÈÓµô×îºóÒ»¸öbatchµÄÄÚÈİ£¨Ëæ»ú·Ö²¼ÔÚÄ£ĞÍÖĞ£©£¬Í¬Ê±£¬seqµÄ¿ªÊ¼Óë½
   def reset(self):
     self.idx=mx.nd.array(np.random.permutation(self.batch_size*self.maxstep),dtype='int32').reshape((self.maxstep,self.batch_size,1))*self.seq_len+np.random.randint(self.maxstart)
 """
-class myIter:#Ç°ÃæÄÇ¸ö°æ±¾ÓĞÎÊÌâ£¬Õâ¸ö°æ±¾ÓÃwrapĞŞÕıÁËÑ­»·ÎÊÌâ£¬ÏÖÔÚ³ÌĞò²»»á¶ªÆúÈÎºÎbatch
+class myIter:#å‰é¢é‚£ä¸ªç‰ˆæœ¬æœ‰é—®é¢˜ï¼Œè¿™ä¸ªç‰ˆæœ¬ç”¨wrapä¿®æ­£äº†å¾ªç¯é—®é¢˜ï¼Œç°åœ¨ç¨‹åºä¸ä¼šä¸¢å¼ƒä»»ä½•batch
   def __init__(self,seq_len,data,discard_len,batch_size=BATCH_SIZE,ctx=mx.gpu()):
     self.seq_len=seq_len+1#will 'eat' 1 extra data.
     self.data=data.as_in_context(ctx)
     self.data_len=data.shape[0]
-    self.take=mx.nd.arange(self.seq_len-1,dtype='int32').reshape((-1,1)).as_in_context(ctx)#-1ÒòÎª²»ÄÜ¶Á´ğ°¸¡­¡­
-    self.discard=mx.nd.arange(discard_len+1,self.seq_len,dtype='int32').reshape((-1,1)).as_in_context(ctx)#»á¶îÍâ¶ªÆúÈô¸É³õÊ¼labelÒÔ·ÀÖ¹nnÄâºÏ²»Í¬BatchµÄÏÎ½Ó´¦µ¼ÖÂÎåÑÔÊ«±ãÈıÑÔÊ«¡­¡­
+    self.take=mx.nd.arange(self.seq_len-1,dtype='int32').reshape((-1,1)).as_in_context(ctx)#-1å› ä¸ºä¸èƒ½è¯»ç­”æ¡ˆâ€¦â€¦
+    self.discard=mx.nd.arange(discard_len+1,self.seq_len,dtype='int32').reshape((-1,1)).as_in_context(ctx)#ä¼šé¢å¤–ä¸¢å¼ƒè‹¥å¹²åˆå§‹labelä»¥é˜²æ­¢nnæ‹Ÿåˆä¸åŒBatchçš„è¡”æ¥å¤„å¯¼è‡´äº”è¨€è¯—ä¾¿ä¸‰è¨€è¯—â€¦â€¦
     self.batch_actual_size=self.seq_len*batch_size
     self.maxstep=self.data_len//self.batch_actual_size
     self.batch_size=batch_size
@@ -152,9 +152,9 @@ if True:
   ST=mx.nd.stack(*([sum(set(myPinYin(char,3,True))&i for i in SGroup if H in i) for H in uniqS] for char in idx2char))
   del SGroup,YGroup,TGroup,s2idx,y2idx,t2idx,uniqS,uniqY
 '''
-SGroup=(('b','p','m','f'),('d','t','n','l'),('zh','ch','sh','r'),('g','k','h'),('j','q','x'),('z','c','s'))#https://baike.baidu.com/item/ÉùÄ¸
-YGroup=(('a','ua','ia'),('o','uo'),('e',),('ie','ve'),('?hi','?i'),('er',),('i',),('ei','uei'),('ai','uai'),('u',),('v',),('ou','iou'),('ao','iao'),('an','ian','uan','van'),('en','in','uen','vn'),('ang','uang','iang'),('eng','ing','ueng'),('ong','iong'))#https://baike.baidu.com/item/ÑºÔÏ
-TGroup=((1,2),(3,4))#ÒõÆ½ÑôÆ½£¬ÉÏÉùÈ¥Éù
+SGroup=(('b','p','m','f'),('d','t','n','l'),('zh','ch','sh','r'),('g','k','h'),('j','q','x'),('z','c','s'))#https://baike.baidu.com/item/å£°æ¯
+YGroup=(('a','ua','ia'),('o','uo'),('e',),('ie','ve'),('?hi','?i'),('er',),('i',),('ei','uei'),('ai','uai'),('u',),('v',),('ou','iou'),('ao','iao'),('an','ian','uan','van'),('en','in','uen','vn'),('ang','uang','iang'),('eng','ing','ueng'),('ong','iong'))#https://baike.baidu.com/item/æŠ¼éŸµ
+TGroup=((1,2),(3,4))#é˜´å¹³é˜³å¹³ï¼Œä¸Šå£°å»å£°
 t2idx=[i for i in range(5)]
 SMOH=mx.nd.one_hot(vocab_as_pyint[:,0],shengMu_size)
 YMOH=mx.nd.one_hot(vocab_as_pyint[:,1],yunMu_size)
@@ -162,7 +162,7 @@ TOH=mx.nd.one_hot(vocab_as_pyint[:,2],tone_size)
 SE=np.eye(shengMu_size,shengMu_size)
 YE=np.eye(yunMu_size,yunMu_size)
 TE=np.eye(tone_size,tone_size)
-if True:#´¦ÀíÑºÔÏ£¬½«Í¬ÀàÉùÄ¸/ÔÏÄ¸/Éùµ÷Ëã³ÉÒ»Àà£¬ÒÔ¼õÉÙÀàËÆXXXXXXÌì£¬XXXXXXÌìÕâÑùµÄÖØ¸´ÔÏ×Ö³öÏÖµÄ¸ÅÂÊ¡£
+if True:#å¤„ç†æŠ¼éŸµï¼Œå°†åŒç±»å£°æ¯/éŸµæ¯/å£°è°ƒç®—æˆä¸€ç±»ï¼Œä»¥å‡å°‘ç±»ä¼¼XXXXXXå¤©ï¼ŒXXXXXXå¤©è¿™æ ·çš„é‡å¤éŸµå­—å‡ºç°çš„æ¦‚ç‡ã€‚
  for x in SGroup:
   SE[(np.array([s2idx[x] for x in x]).reshape(-1,1),np.array([s2idx[x] for x in x]))]=1./len(x)
  for x in YGroup:
@@ -177,7 +177,7 @@ del SMOH,YMOH,TOH,SE,YE,TE,SGroup,YGroup,TGroup,s2idx,y2idx,t2idx,uniqS,uniqY
 
 
 def build_model(vocab_size, embedding_dim, rnn_units, batch_size,seq_len=seq_length,drop=False,_prefix='',keep_state=False):
-  #rnn_units±äÁ¿ÒÑ¾­Ó²±àÂë½øÄ£ĞÍÁË£¬ÓÚÊÇÕâ¸ö²ÎÊıÏÖÔÚ²¢Ã»ÓĞÊ²Ã´ÂÑÓÃ¡­¡­
+  #rnn_unitså˜é‡å·²ç»ç¡¬ç¼–ç è¿›æ¨¡å‹äº†ï¼Œäºæ˜¯è¿™ä¸ªå‚æ•°ç°åœ¨å¹¶æ²¡æœ‰ä»€ä¹ˆåµç”¨â€¦â€¦
   #STx=mx.sym.var('ST',shape=ST.shape)
   #YTx=mx.sym.var('YT',shape=YT.shape)
   #TTx=mx.sym.var('TT',shape=TT.shape)
@@ -260,7 +260,7 @@ from time import time
 from tqdm import tqdm
 from mxboard import SummaryWriter
 sw = SummaryWriter(logdir='./logs', flush_secs=5)
-#Ê¹ÓÃmxboard
+#ä½¿ç”¨mxboard
 #tensorboard --logdir=./logs --host=127.0.0.1 --port=7000
 #http://localhost:7000
 #grads = [i.grad().asnumpy() for i in net.collect_params().values()]
@@ -278,7 +278,7 @@ for epoch in range(epochs):
         with mx.autograd.record():
             #out0= net(data).slice(begin=(None,discard_length,None),end=(None,seq_length,None))
 #            out0,*_= net(data,*states)
-            out0,_= net(data,*states)
+            out0,*_= net(data,*states)
             loss = loss_function(out0, label)
         loss.backward()
         trainer.step(BATCH_SIZE)
@@ -303,7 +303,7 @@ for epoch in range(epochs):
 
 '''
 net.collect_params().save('test2.param',net.prefix)
-net.collect_params().load('test2.param',restore_prefix=b._block._prefix)#¿ÉÒÔÔÚÕâÀïÖ¸¶¨ctx=ctx
+net.collect_params().load('test2.param',restore_prefix=b._block._prefix)#å¯ä»¥åœ¨è¿™é‡ŒæŒ‡å®šctx=ctx
 with mx.gluon.Block().name_scope() as b:
   net_p=build_model(
   vocab_size = vocab_size,
@@ -337,4 +337,4 @@ def generate_text(net, start_string,temperature = 1.0,num_generate = 1000,return
   if return_str:
     return (start_string + ''.join(text_generated))
 
-generate_text(net, "ÉúÃüµÄÒâÒå ",.5,100,return_str=True)
+generate_text(net, "ç”Ÿå‘½çš„æ„ä¹‰ ",.5,100,return_str=True)
