@@ -4,6 +4,10 @@
 
 用tf的原因很简单，因为不明原因我的pyTorch跟MXNet都炸掉了
 
+V0.3，终于找到MXNet炸掉的原因，用N天修好&&熟悉了MXNet的用法，之后把这个炼丹demo迁移到了MXNet
+新模型在训练时候做到了1.25X faster
+至于预测？？tensorflow的预测速度就是个渣渣
+
 ## Apologize
 
 Since most of the potential users are Chinese, Here I will mainly provide Chinese rather than English to explain what I have done.
