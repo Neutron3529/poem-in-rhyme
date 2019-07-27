@@ -28,7 +28,7 @@ python -m pip install pypinyin
 
 值得一提的是，这个.py文件是对命令行友好的，你可以将其中任意整段代码复制粘贴到命令行而不必担心复制粘贴带来的不一致性
 
-## 样例（ver 0.1-0.2)
+## 样例（ver 0.1-0.3)
 
 已经有了初步续写古诗的能力，在开启复读机模式（……）之后，李白给出了一个神奇的输出：
 ```
@@ -50,7 +50,39 @@ python -m pip install pypinyin
 
 天将离白发，真见喜并开。
 自是浮名改，无因用不裁。
+>>> generate_text(net, "静夜思 李白\r\n\r\n床前明月光，疑是地上霜。\r\n举头望明月，低头思故乡。\r\n\r\n",.5,100)#ver 0.3
+静夜思 李白
+
+床前明月光，疑是地上霜。
+举头望明月，低头思故乡。
+
+楚云带霜积，秋草白猿翔。
+却忆旧游日，相思寒夜芳。
+>>> generate_text(net, "静夜思 李白\r\n\r\n床前明月光，疑是地上霜。\r\n举头望明月，低头思故乡。\r\n\r\n",.5,100,return_str=True)
+静夜思 李白
+
+床前明月光，疑是地上霜。
+举头望明月，低头思故乡。
+
+美人摘芳草，婉娈扣清商。
+今日花开院，蜉蝣意还长。
 ```
+# MXNet版
+
+## 说明
+
+使用了mxboard, tqdm进行记录，如果不想加入相应的import语句，请自行删除……
+使用pickle保存了预处理的数据，若觉得pickle保存的数据有问题……可以选择从完整脚本自行生成
+
+## 使用方法
+
+解压[poem-in-rhyme-MXNet-minimal.7z](https://github.com/Neutron3529/poem-in-rhyme/releases/download/0/poem-in-rhyme-MXNet-minimal.7z)
+在解压目录下运行`python poem-in-rhyme-MXNet-minimal.py`
+如果希望生成其他古诗（比如续写《静夜思》），可以改最后一句generate_text函数里面的参数
+有时候运行结果并不能令人满意……如果你觉得古诗不通顺，可以多执行几次generate_text函数，总有一首诗是你想要的……
+
+# Tensorflow版
+
 ## 原理
 
 在最开始，用pyPinYin获取汉字的声母、韵母跟音调，获取不到的留空。
