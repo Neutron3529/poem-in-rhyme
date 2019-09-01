@@ -20,9 +20,18 @@ Python 3.6
 
 ```
 python -m pip install numpy
-python -m pip install tf-nightly-gpu-2.0-preview
 python -m pip install pypinyin
 ```
+for ver<=0.2:
+```
+python -m pip install tf-nightly-gpu-2.0-preview
+```
+for ver>=0.3:
+```
+python -m pip install mxnet-cu100mkl
+```
+小版本号不一致的话问题不大，但我没做过测试
+Other compatible version should be OK but not tested.
 
 ## Usage（ver 0.0）
 
